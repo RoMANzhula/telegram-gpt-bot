@@ -1,7 +1,7 @@
 package org.romanzhula.telegram_gpt_bot.configurations;
 
 import org.romanzhula.telegram_gpt_bot.TelegramBot;
-import org.romanzhula.telegram_gpt_bot.gpt_openai.GptClient;
+import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
 import org.romanzhula.telegram_gpt_bot.telegram.BotSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +27,10 @@ public class TelegramBotConfig {
     public TelegramBot telegramBot(
         BotSettings botSettings,
         TelegramBotsApi telegramBotsApi,
-        GptClient gptClient
+        GptService gptService
     ) {
         DefaultBotOptions defaultBotOptions = new DefaultBotOptions();
-        TelegramBot telegramBot = new TelegramBot(defaultBotOptions, botSettings, gptClient);
+        TelegramBot telegramBot = new TelegramBot(defaultBotOptions, botSettings, gptService);
 
         try {
             telegramBotsApi.registerBot(telegramBot);
