@@ -13,9 +13,26 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>telegram-gpt-bot</name>
 	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+
 	<properties>
 		<java.version>21</java.version>
+		<lombok.version>1.18.34</lombok.version>
+		<telegrambots.starter.version>6.7.0</telegrambots.starter.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -29,13 +46,14 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.telegram</groupId>
-			<artifactId>telegrambots</artifactId>
-			<version>6.9.7.1</version>
+			<artifactId>telegrambots-spring-boot-starter</artifactId>
+			<version>${telegrambots.starter.version}</version>
 		</dependency>
 
 		<!--	Test block	-->
@@ -48,18 +66,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
