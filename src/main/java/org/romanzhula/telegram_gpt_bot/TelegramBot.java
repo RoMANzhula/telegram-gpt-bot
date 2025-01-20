@@ -1,7 +1,6 @@
 package org.romanzhula.telegram_gpt_bot;
 
-import org.romanzhula.telegram_gpt_bot.gpt_openai.GptClient;
-import org.romanzhula.telegram_gpt_bot.gpt_openai.models.ChatCompletion;
+import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
 import org.romanzhula.telegram_gpt_bot.telegram.BotSettings;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -15,16 +14,16 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final BotSettings botSettings;
-    private final GptClient gptClient;
+    private final GptService gptService;
 
     public TelegramBot(
             DefaultBotOptions options,
             BotSettings botSettings,
-            GptClient gptClient
+            GptService gptService
     ) {
         super(options, botSettings.getBotToken());
         this.botSettings = botSettings;
-        this.gptClient = gptClient;
+        this.gptService = gptService;
     }
 
     @Override
@@ -38,10 +37,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             String text = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            ChatCompletion chatCompletionResponse = gptClient.createChatCompletion(text);
-            String textResponse = chatCompletionResponse.choises().get(0).message().content();
+            String gptTextResponse = gptService.getGptResponse(chatId, text);
 
-            SendMessage sendMessage = new SendMessage(chatId.toString(), textResponse);
+            SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
 
             try {
                 sendApiMethod(sendMessage);
