@@ -44,4 +44,9 @@ public class GptChatHistoryService {
         return gptChatHistory;
     }
 
+    // clear history
+    public void deleteChatIdHistory(Long userChatId) {
+        chatHistoryMap.remove(userChatId);
+    }
+
 }
