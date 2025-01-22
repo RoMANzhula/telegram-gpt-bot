@@ -1,11 +1,8 @@
 package org.romanzhula.telegram_gpt_bot.configurations;
 
-import org.romanzhula.telegram_gpt_bot.TelegramBot;
-import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
-import org.romanzhula.telegram_gpt_bot.telegram.BotSettings;
+import org.romanzhula.telegram_gpt_bot.telegram.TelegramBot;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -15,30 +12,17 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TelegramBotConfig {
 
     @Bean
-    public TelegramBotsApi telegramBotsApi() {
-        try {
-            return new TelegramBotsApi(DefaultBotSession.class);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Bean
-    public TelegramBot telegramBot(
-        BotSettings botSettings,
-        TelegramBotsApi telegramBotsApi,
-        GptService gptService
-    ) {
-        DefaultBotOptions defaultBotOptions = new DefaultBotOptions();
-        TelegramBot telegramBot = new TelegramBot(defaultBotOptions, botSettings, gptService);
+    public TelegramBotsApi telegramBotsApi(TelegramBot telegramBot) {
+        TelegramBotsApi telegramBotsApi = null;
 
         try {
+            telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBot);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
 
-        return telegramBot;
+        return telegramBotsApi;
     }
 
 }
