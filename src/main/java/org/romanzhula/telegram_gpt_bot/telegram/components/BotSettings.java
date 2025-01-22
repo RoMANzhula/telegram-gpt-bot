@@ -1,4 +1,4 @@
-package org.romanzhula.telegram_gpt_bot.telegram;
+package org.romanzhula.telegram_gpt_bot.telegram.components;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
