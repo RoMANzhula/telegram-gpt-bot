@@ -1,4 +1,4 @@
-package org.romanzhula.telegram_gpt_bot.telegram.commands;
+package org.romanzhula.telegram_gpt_bot.telegram.commands.services;
 
 import lombok.AllArgsConstructor;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.handlers.TelegramCommandHandler;

@@ -1,7 +1,7 @@
 package org.romanzhula.telegram_gpt_bot.telegram;
 
 import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
-import org.romanzhula.telegram_gpt_bot.telegram.commands.TelegramCommandDispatcher;
+import org.romanzhula.telegram_gpt_bot.telegram.commands.services.TelegramCommandDispatcher;
 import org.romanzhula.telegram_gpt_bot.telegram.components.BotSettings;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
