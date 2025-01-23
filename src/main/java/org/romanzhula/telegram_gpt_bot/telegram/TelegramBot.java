@@ -1,16 +1,21 @@
 package org.romanzhula.telegram_gpt_bot.telegram;
 
 import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
+import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptTranscriberService;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.services.TelegramCommandDispatcher;
+import org.romanzhula.telegram_gpt_bot.telegram.commands.services.TelegramFileService;
 import org.romanzhula.telegram_gpt_bot.telegram.components.BotSettings;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -20,17 +25,25 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotSettings botSettings;
     private final GptService gptService;
     private final TelegramCommandDispatcher telegramCommandDispatcher;
+    private final TelegramFileService telegramFileService;
+    private final GptTranscriberService gptTranscriberService;
+
 
     public TelegramBot(
             BotSettings botSettings,
             GptService gptService,
-            TelegramCommandDispatcher telegramCommandDispatcher
+            TelegramCommandDispatcher telegramCommandDispatcher,
+            @Lazy TelegramFileService telegramFileService,
+            GptTranscriberService gptTranscriberService
     ) {
         super(new DefaultBotOptions(), botSettings.getBotToken());
         this.botSettings = botSettings;
         this.gptService = gptService;
         this.telegramCommandDispatcher = telegramCommandDispatcher;
+        this.telegramFileService = telegramFileService;
+        this.gptTranscriberService = gptTranscriberService;
     }
+
 
     @Override
     public String getBotUsername() {
@@ -70,6 +83,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private List<BotApiMethod<?>> processUpdate(Update update) {
+
+        if (update.hasMessage() && update.getMessage().hasVoice()) {
+            Voice voice = update.getMessage().getVoice();
+            String fileId = voice.getFileId();
+            Long chatId = update.getMessage().getChatId();
+
+            File fileVoice = telegramFileService.getFile(fileId);
+            String textFromVoiceFile = gptTranscriberService.transcribe(fileVoice);
+            String gptTextResponse = gptService.getGptResponse(chatId, textFromVoiceFile);
+
+            SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
+
+            return List.of(sendMessage);
+        }
 
         if (telegramCommandDispatcher.isCommand(update)) {
             return List.of(telegramCommandDispatcher.processCommand(update));
