@@ -11,6 +11,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -85,17 +86,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private List<BotApiMethod<?>> processUpdate(Update update) {
 
         if (update.hasMessage() && update.getMessage().hasVoice()) {
-            Voice voice = update.getMessage().getVoice();
-            String fileId = voice.getFileId();
-            Long chatId = update.getMessage().getChatId();
-
-            File fileVoice = telegramFileService.getFile(fileId);
-            String textFromVoiceFile = gptTranscriberService.transcribe(fileVoice);
-            String gptTextResponse = gptService.getGptResponse(chatId, textFromVoiceFile);
-
-            SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
-
-            return List.of(sendMessage);
+            return processSendVoiceMessage(update.getMessage());
         }
 
         if (telegramCommandDispatcher.isCommand(update)) {
@@ -103,17 +94,36 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String text = update.getMessage().getText();
-            Long chatId = update.getMessage().getChatId();
-
-            String gptTextResponse = gptService.getGptResponse(chatId, text);
-
-            SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
-
-            return List.of(sendMessage);
+            return processSendTextMessage(update.getMessage());
         }
 
         return List.of();
+    }
+
+
+    private List<BotApiMethod<?>> processSendVoiceMessage(Message message) {
+        Voice voice = message.getVoice();
+        String fileId = voice.getFileId();
+        Long chatId = message.getChatId();
+
+        File fileVoice = telegramFileService.getFile(fileId);
+        String textFromVoiceFile = gptTranscriberService.transcribe(fileVoice);
+        String gptTextResponse = gptService.getGptResponse(chatId, textFromVoiceFile);
+
+        SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
+
+        return List.of(sendMessage);
+    }
+
+    private List<BotApiMethod<?>> processSendTextMessage(Message message) {
+        String text = message.getText();
+        Long chatId = message.getChatId();
+
+        String gptTextResponse = gptService.getGptResponse(chatId, text);
+
+        SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
+
+        return List.of(sendMessage);
     }
 
 }
