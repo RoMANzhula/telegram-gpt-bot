@@ -1,7 +1,9 @@
 package org.romanzhula.telegram_gpt_bot.telegram;
 
+import lombok.extern.slf4j.Slf4j;
 import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptService;
 import org.romanzhula.telegram_gpt_bot.gpt_openai.services.GptTranscriberService;
+import org.romanzhula.telegram_gpt_bot.telegram.async.TelegramAsyncMessageSenderService;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.services.TelegramCommandDispatcher;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.services.TelegramFileService;
 import org.romanzhula.telegram_gpt_bot.telegram.components.BotSettings;
@@ -20,6 +22,7 @@ import java.io.File;
 import java.util.List;
 
 
+@Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
@@ -28,6 +31,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final TelegramCommandDispatcher telegramCommandDispatcher;
     private final TelegramFileService telegramFileService;
     private final GptTranscriberService gptTranscriberService;
+    private final TelegramAsyncMessageSenderService telegramAsyncMessageSenderService;
 
 
     public TelegramBot(
@@ -35,7 +39,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             GptService gptService,
             TelegramCommandDispatcher telegramCommandDispatcher,
             @Lazy TelegramFileService telegramFileService,
-            GptTranscriberService gptTranscriberService
+            GptTranscriberService gptTranscriberService,
+            @Lazy TelegramAsyncMessageSenderService telegramAsyncMessageSenderService
     ) {
         super(new DefaultBotOptions(), botSettings.getBotToken());
         this.botSettings = botSettings;
@@ -43,6 +48,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.telegramCommandDispatcher = telegramCommandDispatcher;
         this.telegramFileService = telegramFileService;
         this.gptTranscriberService = gptTranscriberService;
+        this.telegramAsyncMessageSenderService = telegramAsyncMessageSenderService;
     }
 
 
@@ -84,17 +90,26 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private List<BotApiMethod<?>> processUpdate(Update update) {
-
-        if (update.hasMessage() && update.getMessage().hasVoice()) {
-            return processSendVoiceMessage(update.getMessage());
-        }
+        Long userChatId = update.getMessage().getChatId();
 
         if (telegramCommandDispatcher.isCommand(update)) {
             return List.of(telegramCommandDispatcher.processCommand(update));
         }
 
+        if (update.hasMessage() && update.getMessage().hasVoice()) {
+            telegramAsyncMessageSenderService.sendMessageAsync(
+                    userChatId.toString(),
+                    () -> (SendMessage) processSendVoiceMessage(update.getMessage()),
+                    this::getErrorMessageForProcessSendVoiceMessage
+            );
+        }
+
         if (update.hasMessage() && update.getMessage().hasText()) {
-            return processSendTextMessage(update.getMessage());
+            telegramAsyncMessageSenderService.sendMessageAsync(
+                    userChatId.toString(),
+                    () -> (SendMessage) processSendTextMessage(update.getMessage()),
+                    this::getErrorMessageForProcessSendTextMessage
+            );
         }
 
         return List.of();
@@ -124,6 +139,24 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage sendMessage = new SendMessage(chatId.toString(), gptTextResponse);
 
         return List.of(sendMessage);
+    }
+
+    private SendMessage getErrorMessageForProcessSendTextMessage(Throwable throwable) {
+        log.error("Error during process send text message! Please try again later.", throwable);
+
+        return SendMessage.builder()
+                .text("Error during process send text message! Please try again later.")
+                .build()
+        ;
+    }
+
+    private SendMessage getErrorMessageForProcessSendVoiceMessage(Throwable throwable) {
+        log.error("Error during process send voice message! Please try again later.", throwable);
+
+        return SendMessage.builder()
+                .text("Error during process send voice message! Please try again later.")
+                .build()
+        ;
     }
 
 }

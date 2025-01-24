@@ -26,7 +26,7 @@ import java.net.URL;
 public class TelegramFileService {
 
     private final BotSettings botSettings;
-    private final @Lazy DefaultAbsSender sender;
+    private final DefaultAbsSender sender;
 
 
     public java.io.File getFile(String fileId) {
