@@ -6,7 +6,7 @@ import org.romanzhula.telegram_gpt_bot.telegram.commands.enums.TelegramCommands;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 
 @RequiredArgsConstructor
@@ -17,17 +17,18 @@ public class ClearCommandHandler implements TelegramCommandHandler {
 
     private final String CLEAR_HISTORY_MESSAGE = "Your GPT history has been cleared.";
 
+
     @Override
     public TelegramCommands getSupportedCommand() {
         return TelegramCommands.CLEAR_COMMAND;
     }
 
     @Override
-    public BotApiMethod<?> processCommand(Update update) {
-        gptChatHistoryService.deleteChatIdHistory(update.getMessage().getChatId());
+    public BotApiMethod<?> processCommand(Message message) {
+        gptChatHistoryService.deleteChatIdHistory(message.getChatId());
 
         return SendMessage.builder()
-                .chatId(update.getMessage().getChatId())
+                .chatId(message.getChatId())
                 .text(CLEAR_HISTORY_MESSAGE)
                 .build()
         ;
