@@ -5,7 +5,7 @@ import org.romanzhula.telegram_gpt_bot.telegram.commands.handlers.TelegramComman
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,14 +17,14 @@ public class TelegramCommandDispatcher {
 
     private final List<TelegramCommandHandler> commandHandlerList;
 
-    public BotApiMethod<?> processCommand(Update update) {
-        String text = update.getMessage().getText();
+    public BotApiMethod<?> processCommand(Message message) {
+        String text = message.getText();
 
         if (!text.startsWith("/")) {
             throw new IllegalArgumentException("Not valid command: %s. Will add /".formatted(text));
         }
 
-        if (!isCommand(update)) {
+        if (!isCommand(message)) {
             throw new IllegalArgumentException("It's not a command: %s. Try again please.".formatted(text));
         }
 
@@ -37,20 +37,17 @@ public class TelegramCommandDispatcher {
             System.out.printf("Such a command does not exist. Check your command: %s.%n", text);
 
             return SendMessage.builder()
-                    .chatId(update.getMessage().getChatId())
+                    .chatId(message.getChatId())
                     .text("Such a command does not exist. Check your command: %s.%n".formatted(text))
                     .build()
             ;
         }
 
-        return suitedCommandHandler.orElseThrow().processCommand(update);
+        return suitedCommandHandler.orElseThrow().processCommand(message);
     }
 
-    public boolean isCommand(Update update) {
-        return update.hasMessage() &&
-                update.getMessage().hasText() &&
-                update.getMessage().getText().startsWith("/")
-        ;
+    public boolean isCommand(Message message) {
+        return message.hasText() && message.getText().startsWith("/");
     }
 
 }
