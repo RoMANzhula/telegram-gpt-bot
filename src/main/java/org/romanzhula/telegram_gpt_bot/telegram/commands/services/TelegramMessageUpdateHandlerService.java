@@ -20,7 +20,7 @@ public class TelegramMessageUpdateHandlerService {
 
     private final TelegramCommandMessageHandler commandMessageHandler;
     private final TelegramTextMessageHandler textMessageHandler;
-    private final TelegramVoiceMessageHandler telegramVoiceMessageHandler;
+    private final TelegramVoiceMessageHandler voiceMessageHandler;
     private final TelegramAsyncMessageSenderService asyncMessageSender;
 
 
@@ -36,7 +36,7 @@ public class TelegramMessageUpdateHandlerService {
             if (message.hasVoice()) {
                 asyncMessageSender.sendMessageAsync(
                         userChatId.toString(),
-                        () -> (SendMessage) telegramVoiceMessageHandler.handleVoiceMessage(message),
+                        () -> (SendMessage) voiceMessageHandler.handleVoiceMessage(message),
                         throwable -> new SendMessage(
                                 userChatId.toString(),
                                 "Error processing voice message."
