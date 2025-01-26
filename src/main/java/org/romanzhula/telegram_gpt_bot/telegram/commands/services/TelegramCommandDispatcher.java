@@ -1,6 +1,7 @@
 package org.romanzhula.telegram_gpt_bot.telegram.commands.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.handlers.TelegramCommandHandler;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class TelegramCommandDispatcher {
@@ -21,10 +23,12 @@ public class TelegramCommandDispatcher {
         String text = message.getText();
 
         if (!text.startsWith("/")) {
+            log.error("Not valid command: {}. Will add /", text);
             throw new IllegalArgumentException("Not valid command: %s. Will add /".formatted(text));
         }
 
         if (!isCommand(message)) {
+            log.error("It is not a command: {}. Try again please.", text);
             throw new IllegalArgumentException("It's not a command: %s. Try again please.".formatted(text));
         }
 
@@ -34,7 +38,7 @@ public class TelegramCommandDispatcher {
         ;
 
         if (suitedCommandHandler.isEmpty()) {
-            System.out.printf("Such a command does not exist. Check your command: %s.%n", text);
+            log.info("Such a command does not exist. Check your command: {}", text);
 
             return SendMessage.builder()
                     .chatId(message.getChatId())
