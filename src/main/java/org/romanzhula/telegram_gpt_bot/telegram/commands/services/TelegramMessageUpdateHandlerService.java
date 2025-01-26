@@ -1,6 +1,7 @@
 package org.romanzhula.telegram_gpt_bot.telegram.commands.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.romanzhula.telegram_gpt_bot.telegram.async.TelegramAsyncMessageSenderService;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.handlers.messages.TelegramCommandMessageHandler;
 import org.romanzhula.telegram_gpt_bot.telegram.commands.handlers.messages.TelegramTextMessageHandler;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.List;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TelegramMessageUpdateHandlerService {
@@ -37,10 +39,13 @@ public class TelegramMessageUpdateHandlerService {
                 asyncMessageSender.sendMessageAsync(
                         userChatId.toString(),
                         () -> (SendMessage) voiceMessageHandler.handleVoiceMessage(message),
-                        throwable -> new SendMessage(
-                                userChatId.toString(),
-                                "Error processing voice message."
-                        )
+                        throwable -> {
+                            log.error("Error processing voice message for user: {}", userChatId, throwable);
+                            return new SendMessage(
+                                    userChatId.toString(),
+                                    "Error processing voice message."
+                            );
+                        }
                 );
             }
 
@@ -48,10 +53,13 @@ public class TelegramMessageUpdateHandlerService {
                 asyncMessageSender.sendMessageAsync(
                         userChatId.toString(),
                         () -> (SendMessage) textMessageHandler.handleTextMessage(message),
-                        throwable -> new SendMessage(
-                                userChatId.toString(),
-                                "Error processing text message."
-                        )
+                        throwable -> {
+                            log.error("Error processing text message for user: {}", userChatId, throwable);
+                            return new SendMessage(
+                                    userChatId.toString(),
+                                    "Error processing text message."
+                            );
+                        }
                 );
             }
         }
