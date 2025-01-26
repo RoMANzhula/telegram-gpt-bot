@@ -28,6 +28,7 @@ public class TelegramTextMessageHandler {
             String response = gptService.getGptResponse(chatId, text);
             return List.of(new SendMessage(chatId.toString(), response));
         } catch (Exception exception) {
+            log.error("Error during processing text message! Please try again later.");
             return List.of(
                     ErrorMessageBuilder.buildErrorMessage(
                             chatId.toString(),
