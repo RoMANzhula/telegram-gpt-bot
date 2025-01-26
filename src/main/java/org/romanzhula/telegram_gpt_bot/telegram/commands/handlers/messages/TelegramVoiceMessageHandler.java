@@ -34,11 +34,16 @@ public class TelegramVoiceMessageHandler {
         Voice voice = message.getVoice();
 
         try {
-            File voiceFile = telegramFileService.getFile(voice.getFileId());
+            File voiceFile = null;
+            if (telegramFileService != null) {
+                voiceFile = telegramFileService.getFile(voice.getFileId());
+            }
+
             String transcribedText = gptTranscriberService.transcribe(voiceFile);
             String response = gptService.getGptResponse(chatId, transcribedText);
             return List.of(new SendMessage(chatId.toString(), response));
         } catch (Exception exception) {
+            log.error("Error during processing voice message!", exception);
             return List.of(
                     ErrorMessageBuilder.buildErrorMessage(
                             chatId.toString(),
