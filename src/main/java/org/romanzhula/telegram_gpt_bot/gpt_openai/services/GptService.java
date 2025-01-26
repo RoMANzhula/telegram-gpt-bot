@@ -9,7 +9,6 @@ import org.romanzhula.telegram_gpt_bot.gpt_openai.models.Message;
 import org.romanzhula.telegram_gpt_bot.gpt_openai.requests.ChatCompletionRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @AllArgsConstructor
 @Service

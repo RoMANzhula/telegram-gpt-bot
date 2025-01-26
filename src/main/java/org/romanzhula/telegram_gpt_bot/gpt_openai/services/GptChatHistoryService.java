@@ -1,6 +1,7 @@
 package org.romanzhula.telegram_gpt_bot.gpt_openai.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.romanzhula.telegram_gpt_bot.gpt_openai.models.GptChatHistory;
 import org.romanzhula.telegram_gpt_bot.gpt_openai.models.Message;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class GptChatHistoryService {
@@ -36,6 +38,7 @@ public class GptChatHistoryService {
         GptChatHistory gptChatHistory = chatHistoryMap.get(userChatId);
 
         if (gptChatHistory == null) {
+            log.error("History not exists. User chatId: {}", userChatId);
             throw new IllegalStateException("History not exists. User chatId: %s".formatted(userChatId));
         }
 
@@ -47,6 +50,7 @@ public class GptChatHistoryService {
     // clear history
     public void deleteChatIdHistory(Long userChatId) {
         chatHistoryMap.remove(userChatId);
+        log.info("Content history with chat GPT cleared. For user chatId: {}", userChatId);
     }
 
 }
