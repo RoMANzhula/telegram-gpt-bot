@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.romanzhula.telegram_gpt_bot.telegram.components.BotSettings;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -38,6 +37,7 @@ public class TelegramFileService {
                     .build()
             );
         } catch (TelegramApiException e) {
+            log.error("Error during execute file.", e);
             throw new RuntimeException(e);
         }
 
@@ -51,6 +51,7 @@ public class TelegramFileService {
         try {
             url = new URI(fileUrl).toURL();
         } catch (MalformedURLException | URISyntaxException e) {
+            log.error("Error during forming url-link", e);
             throw new RuntimeException(e);
         }
 
@@ -58,6 +59,7 @@ public class TelegramFileService {
         try {
             temporaryfile = java.io.File.createTempFile("telegram", ".ogg");
         } catch (IOException e) {
+            log.error("Error during creating temporary fie.", e);
             throw new RuntimeException(e);
         }
 
